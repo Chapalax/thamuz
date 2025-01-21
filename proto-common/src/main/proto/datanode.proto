@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+
+package datanode;
+
+option java_package = "com.thamuz.gprc.datanode";
+option java_multiple_files = true;
+
+message UploadFileRequest {
+  string uuid = 1;
+  bytes file = 2;
+}
+
+message UuidRequest {
+  string uuid = 1;
+}
+
+enum FileIOStatusCode {
+  SUCCESS = 0;
+  INTERNAL_SERVER_ERROR = 1;
+  INVALID_UUID = 2;
+}
+
+message FileIOResponse {
+  google.protobuf.Timestamp timestamp = 1;
+  FileIOStatusCode status = 2;
+  string message = 3;
+  optional bytes file = 4;
+}
+
+service FileIOService {
+  rpc registerUuid (UuidRequest) returns (FileIOResponse) {};
+  rpc writeFile (UploadFileRequest) returns (FileIOResponse) {};
+  rpc readFile (UuidRequest) returns (FileIOResponse) {};
+}

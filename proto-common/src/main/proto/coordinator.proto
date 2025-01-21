@@ -1,0 +1,56 @@
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+
+package coordinator;
+
+option java_package = "com.thamuz.gprc.coordinator";
+option java_multiple_files = true;
+
+message NavigateRequest {
+  string file_path = 1;
+}
+
+message NavigateResponse {
+  string datanode = 1;
+  string uuid = 2;
+}
+
+enum NavigateErrorCode {
+  FILE_ALREADY_EXISTS = 0;
+  FILE_NOT_FOUND = 1;
+  DATANODE_OFFLINE = 2;
+  FILE_PATH_IS_NULL = 3;
+}
+
+message NavigateExceptionResponse {
+  google.protobuf.Timestamp timestamp = 1;
+  NavigateErrorCode error_code = 2;
+  string message = 3;
+}
+
+// Service for communication with client
+service CoordinatorService {
+  rpc defineWriteAddress (NavigateRequest) returns (NavigateResponse) {};
+  rpc defineReadAddress (NavigateRequest) returns (NavigateResponse) {};
+}
+
+message RegisterDataNodeRequest {
+  string node_address = 1;
+}
+
+message HeartbeatRequest {
+  string node_address = 1;
+  google.protobuf.Timestamp timestamp = 2;
+}
+
+message StatusResponse {
+  bool status = 1; // Could be replaced by an enum with detailed statuses
+  string message = 2;
+}
+
+// Service for cluster control
+service ClusterManagerService {
+  rpc registerDataNode (RegisterDataNodeRequest) returns (StatusResponse) {};
+  rpc nodeHeartbeat (stream HeartbeatRequest) returns (StatusResponse) {};
+}
