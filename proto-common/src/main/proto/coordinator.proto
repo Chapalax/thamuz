@@ -42,6 +42,7 @@ message RegisterDataNodeRequest {
 message HeartbeatRequest {
   string node_address = 1;
   google.protobuf.Timestamp timestamp = 2;
+  int32 workload = 3;
 }
 
 message StatusResponse {
@@ -52,5 +53,5 @@ message StatusResponse {
 // Service for cluster control
 service ClusterManagerService {
   rpc registerDataNode (RegisterDataNodeRequest) returns (StatusResponse) {};
-  rpc nodeHeartbeat (stream HeartbeatRequest) returns (StatusResponse) {};
+  rpc nodeHeartbeat (stream HeartbeatRequest) returns (stream StatusResponse) {};
 }
