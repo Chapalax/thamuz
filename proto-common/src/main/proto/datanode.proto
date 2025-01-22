@@ -29,8 +29,13 @@ message FileIOResponse {
   optional bytes file = 4;
 }
 
+// Service for file operations
 service FileIOService {
-  rpc registerUuid (UuidRequest) returns (FileIOResponse) {};
   rpc writeFile (UploadFileRequest) returns (FileIOResponse) {};
   rpc readFile (UuidRequest) returns (FileIOResponse) {};
+}
+
+// UUID management service
+service UuidService {
+  rpc registerUuid (UuidRequest) returns (FileIOResponse) {};
 }

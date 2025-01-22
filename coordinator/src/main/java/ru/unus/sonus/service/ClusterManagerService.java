@@ -78,4 +78,8 @@ public class ClusterManagerService extends ClusterManagerServiceGrpc.ClusterMana
         }
         return leastLoadedDataNodeAddress;
     }
+
+    public boolean isAvailable(String dataNodeAddress) {
+        return dataNodes.containsKey(dataNodeAddress);
+    }
 }
