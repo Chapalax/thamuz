@@ -35,23 +35,18 @@ service CoordinatorService {
   rpc defineReadAddress (NavigateRequest) returns (NavigateResponse) {};
 }
 
-message RegisterDataNodeRequest {
-  string node_address = 1;
-}
-
 message HeartbeatRequest {
   string node_address = 1;
   google.protobuf.Timestamp timestamp = 2;
   int32 workload = 3;
 }
 
-message StatusResponse {
+message HeartbeatResponse {
   bool status = 1; // Could be replaced by an enum with detailed statuses
   string message = 2;
 }
 
 // Service for cluster control
 service ClusterManagerService {
-  rpc registerDataNode (RegisterDataNodeRequest) returns (StatusResponse) {};
-  rpc nodeHeartbeat (stream HeartbeatRequest) returns (stream StatusResponse) {};
+  rpc nodeHeartbeat (stream HeartbeatRequest) returns (stream HeartbeatResponse) {};
 }
