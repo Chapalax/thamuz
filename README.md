@@ -94,15 +94,21 @@ At present, two functions are available: upload and download. These allow users 
 ### Upload
 
 Step 1: Send the "upload" command.
+
 Step 2: Provide the absolute path of an existing file on your computer.
+
 Step 3: Specify the absolute path where the file should be uploaded on the server, including the file extension.
+
 Step 4: Enjoy! 👀
 
 ### Download
 
 Step 1: Send the "download" command.
+
 Step 2: Provide the absolute path of the file located on the server, including the file extension.
+
 Step 3: Receive a message indicating the location of the downloaded file.
+
 Step 4: Enjoy! 👀
 
 ---
