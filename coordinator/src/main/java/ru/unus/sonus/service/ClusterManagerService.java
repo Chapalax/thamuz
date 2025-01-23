@@ -1,5 +1,6 @@
 package ru.unus.sonus.service;
 
+import com.google.protobuf.Timestamp;
 import com.thamuz.gprc.coordinator.ClusterManagerServiceGrpc;
 import com.thamuz.gprc.coordinator.HeartbeatRequest;
 import com.thamuz.gprc.coordinator.HeartbeatResponse;
@@ -8,7 +9,11 @@ import lombok.extern.slf4j.Slf4j;
 import net.devh.boot.grpc.server.service.GrpcService;
 import ru.unus.sonus.model.DataNodeInfo;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Slf4j
@@ -23,6 +28,9 @@ public class ClusterManagerService extends ClusterManagerServiceGrpc.ClusterMana
 
             @Override
             public void onNext(HeartbeatRequest heartbeatRequest) {
+                if (!dataNodes.containsKey(heartbeatRequest.getNodeAddress())) {
+                    log.info("DataNode {} was successfully registered!", heartbeatRequest.getNodeAddress());
+                }
                 // TODO: validate data
                 DataNodeInfo info = new DataNodeInfo(heartbeatRequest.getWorkload(), heartbeatRequest.getTimestamp());
                 dataNodes.put(heartbeatRequest.getNodeAddress(), info);
@@ -59,5 +67,22 @@ public class ClusterManagerService extends ClusterManagerServiceGrpc.ClusterMana
 
     public boolean isAvailable(String dataNodeAddress) {
         return dataNodes.containsKey(dataNodeAddress);
+    }
+
+    public void deleteDeathDataNodes(int boundary) {
+        Instant time = Instant.now();
+        List<String> deathDataNodes = new ArrayList<>();
+        for (Map.Entry<String, DataNodeInfo> info : dataNodes.entrySet()) {
+            Timestamp currentTimestamp = info.getValue().timestamp();
+            Instant currentInstant = Instant.ofEpochSecond(currentTimestamp.getSeconds(), currentTimestamp.getNanos());
+            if (time.minus(boundary, ChronoUnit.MINUTES).isAfter(currentInstant)) {
+                deathDataNodes.add(info.getKey());
+            }
+        }
+
+        for (String dataNodeAddress : deathDataNodes) {
+            log.info("DataNode {} was removed.", dataNodeAddress);
+            dataNodes.remove(dataNodeAddress);
+        }
     }
 }
