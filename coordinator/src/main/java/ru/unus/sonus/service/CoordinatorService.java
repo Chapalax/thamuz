@@ -9,6 +9,7 @@ import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import net.devh.boot.grpc.server.service.GrpcService;
 import ru.unus.sonus.exception.NavigateException;
 import ru.unus.sonus.model.FileInfo;
@@ -16,6 +17,7 @@ import ru.unus.sonus.model.FileInfo;
 import java.util.HashMap;
 import java.util.UUID;
 
+@Slf4j
 @GrpcService
 @RequiredArgsConstructor
 public class CoordinatorService extends CoordinatorServiceGrpc.CoordinatorServiceImplBase {
@@ -56,6 +58,7 @@ public class CoordinatorService extends CoordinatorServiceGrpc.CoordinatorServic
             throw new NavigateException(NavigateErrorCode.DATANODE_OFFLINE, "DataNode is currently unavailable.");
         }
 
+        log.info("Found least loaded data node: {}", dataNodeAddress);
         UUID uuid = UUID.randomUUID();
 
         ManagedChannel targetChannel = channelPool.computeIfAbsent(dataNodeAddress,
@@ -81,6 +84,5 @@ public class CoordinatorService extends CoordinatorServiceGrpc.CoordinatorServic
                 .build()
         );
         responseObserver.onCompleted();
-        targetChannel.shutdown();
     }
 }

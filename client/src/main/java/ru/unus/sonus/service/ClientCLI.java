@@ -32,7 +32,6 @@ public class ClientCLI {
                         String newPath = scanner.nextLine();
                         System.out.println(newPath);
                         fileProcessingService.uploadFile(newPath, fis.readAllBytes());
-                        counter++;
                     } catch (IOException | StatusRuntimeException e) {
                         log.error("Error while uploading file", e);
                     }
@@ -43,11 +42,15 @@ public class ClientCLI {
                     try {
                         String homePath = System.getProperty("user.home") + File.separator
                                 + "file_" + counter + path.substring(path.lastIndexOf('.'));
+                        byte[] fileIOResponse = fileProcessingService.readFile(path);
                         FileOutputStream fos = new FileOutputStream(homePath);
-                        fos.write(fileProcessingService.readFile(path));
+                        fos.write(fileIOResponse);
                         fos.close();
+                        log.info("Successfully downloaded file to {}", homePath);
                     } catch (IOException | StatusRuntimeException | StringIndexOutOfBoundsException e) {
                         log.error("Error while downloading file", e);
+                    } finally {
+                        counter++;
                     }
                 }
             }

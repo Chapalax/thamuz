@@ -14,12 +14,16 @@ import lombok.extern.slf4j.Slf4j;
 import net.devh.boot.grpc.client.inject.GrpcClient;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
+
 @Slf4j
 @Service
 public class FileProcessingService {
 
     @GrpcClient("coordinator")
     private CoordinatorServiceGrpc.CoordinatorServiceBlockingStub coordinatorStub;
+
+    private final HashMap<String, ManagedChannel> channelPool = new HashMap<>();
 
     public void uploadFile(String filePath, byte[] fileContent) {
         NavigateRequest request = NavigateRequest.newBuilder()
@@ -28,9 +32,12 @@ public class FileProcessingService {
 
         NavigateResponse navigateResponse = coordinatorStub.defineWriteAddress(request);
 
-        ManagedChannel targetChannel = ManagedChannelBuilder.forTarget(navigateResponse.getDatanode())
+        ManagedChannel targetChannel = channelPool.computeIfAbsent(navigateResponse.getDatanode(),
+                addr -> ManagedChannelBuilder.forTarget(addr)
                         .usePlaintext()
-                        .build();
+                        .build()
+        );
+
         FileIOServiceGrpc.FileIOServiceBlockingStub dataNodeStub = FileIOServiceGrpc.newBlockingStub(targetChannel);
 
         UploadFileRequest uploadFileRequest = UploadFileRequest.newBuilder()
@@ -40,7 +47,6 @@ public class FileProcessingService {
 
         FileIOResponse fileIOResponse = dataNodeStub.writeFile(uploadFileRequest);
         log.info("{} {}", fileIOResponse.getStatus(), fileIOResponse.getMessage());
-        targetChannel.shutdown();
     }
 
     public byte[] readFile(String filePath) {
@@ -50,17 +56,20 @@ public class FileProcessingService {
 
         NavigateResponse navigateResponse = coordinatorStub.defineReadAddress(request);
 
-        ManagedChannel targetChannel = ManagedChannelBuilder.forTarget(navigateResponse.getDatanode())
-                .usePlaintext()
-                .build();
+        ManagedChannel targetChannel = channelPool.computeIfAbsent(navigateResponse.getDatanode(),
+                addr -> ManagedChannelBuilder.forTarget(addr)
+                        .usePlaintext()
+                        .build()
+        );
+
         FileIOServiceGrpc.FileIOServiceBlockingStub dataNodeStub = FileIOServiceGrpc.newBlockingStub(targetChannel);
 
         UuidRequest uuidRequest = UuidRequest.newBuilder()
                 .setUuid(navigateResponse.getUuid())
                 .build();
 
-        targetChannel.shutdown();
-
-        return dataNodeStub.readFile(uuidRequest).getFile().toByteArray();
+        FileIOResponse response = dataNodeStub.readFile(uuidRequest);
+        log.info("{} {}", response.getStatus(), response.getMessage());
+        return response.getFile().toByteArray();
     }
 }
