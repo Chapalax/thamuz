@@ -81,5 +81,6 @@ public class CoordinatorService extends CoordinatorServiceGrpc.CoordinatorServic
                 .build()
         );
         responseObserver.onCompleted();
+        targetChannel.shutdown();
     }
 }

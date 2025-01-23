@@ -31,7 +31,7 @@ public class ClusterManagerService extends ClusterManagerServiceGrpc.ClusterMana
                 if (!dataNodes.containsKey(heartbeatRequest.getNodeAddress())) {
                     log.info("DataNode {} was successfully registered!", heartbeatRequest.getNodeAddress());
                 }
-                // TODO: validate data
+
                 DataNodeInfo info = new DataNodeInfo(heartbeatRequest.getWorkload(), heartbeatRequest.getTimestamp());
                 dataNodes.put(heartbeatRequest.getNodeAddress(), info);
                 responseObserver.onNext(HeartbeatResponse.newBuilder()

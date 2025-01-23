@@ -4,6 +4,7 @@ import com.google.protobuf.ByteString;
 import com.google.protobuf.Timestamp;
 import com.thamuz.gprc.datanode.*;
 import io.grpc.stub.StreamObserver;
+import lombok.extern.slf4j.Slf4j;
 import net.devh.boot.grpc.server.service.GrpcService;
 import ru.unus.sonus.schedule.HeartbeatScheduler;
 
@@ -11,6 +12,7 @@ import java.time.Instant;
 import java.util.HashMap;
 import java.util.UUID;
 
+@Slf4j
 @GrpcService
 public class FileIOService extends FileIOServiceGrpc.FileIOServiceImplBase {
 
@@ -27,9 +29,11 @@ public class FileIOService extends FileIOServiceGrpc.FileIOServiceImplBase {
                         .build());
 
         if (!storage.containsKey(currentUuid)) {
+            log.info("Invalid UUID {}", currentUuid);
             builder.setStatus(FileIOStatusCode.INVALID_UUID)
                     .setMessage("Invalid UUID.");
         } else {
+            log.info("Uploaded file {}", currentUuid);
             storage.put(currentUuid, request.getFile());
             HeartbeatScheduler.workload += request.getFile().size();
             builder.setStatus(FileIOStatusCode.SUCCESS)
@@ -51,9 +55,11 @@ public class FileIOService extends FileIOServiceGrpc.FileIOServiceImplBase {
                         .build());
 
         if (!storage.containsKey(currentUuid)) {
+            log.info("Invalid UUID {}", currentUuid);
             builder.setStatus(FileIOStatusCode.INVALID_UUID)
                     .setMessage("Invalid UUID.");
         } else {
+            log.info("Downloaded file {}", currentUuid);
             builder.setStatus(FileIOStatusCode.SUCCESS)
                     .setMessage("File successfully downloaded.")
                     .setFile(storage.get(currentUuid));
@@ -64,6 +70,7 @@ public class FileIOService extends FileIOServiceGrpc.FileIOServiceImplBase {
     }
 
     public void addUuid(UUID uuid) {
+        log.info("UUID {} successfully registered.", uuid);
         storage.put(uuid, null);
     }
 }
