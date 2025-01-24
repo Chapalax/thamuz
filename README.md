@@ -12,21 +12,6 @@ Thamuz is a distributed file storage system based on [Java](https://www.oracle.c
 
 ---
 
-## Project Structure 📚
-
-```
-Thamuz/
-|
-|-- client/               # Client logic for interacting with the system
-|-- coordinator/          # Coordinator node responsible for managing data nodes
-|-- datanode/             # Data node logic for storing and serving files
-|-- proto-common/         # gRPC and protocol buffer definitions
-|-- README.md             # Project documentation
-|-- pom.xml               # Maven project configuration
-```
-
----
-
 ## Prerequisites 📌
 
 - [`Java 17+`](https://www.oracle.com/java/technologies/downloads/#java17)
