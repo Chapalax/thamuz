@@ -15,7 +15,11 @@ Thamuz is a distributed file storage system based on [Java](https://www.oracle.c
 ## Prerequisites 📌
 
 - [`Java 17+`](https://www.oracle.com/java/technologies/downloads/#java17)
-- [`Maven`](https://maven.apache.org/)
+- [`Maven`](https://maven.apache.org/) 
+
+> Ensure maven is using the correct java version: `$ mvn -version` has to print out `Java version: 17...`
+
+- [`Makefile`](https://www.gnu.org/software/make/) to remove tedious chain of commands when building & running the project
 - [`Docker`](https://www.docker.com/) (In the future)
 
 ---
@@ -25,76 +29,81 @@ Thamuz is a distributed file storage system based on [Java](https://www.oracle.c
 ### Clone the Repository
 
 ```bash
-git clone https://github.com/Chapalax/thamuz.git
+$ git clone https://github.com/Chapalax/thamuz.git
 ```
 
 ### Build the Project
 
-#### 1. Build the `proto-common` module
-
-(In /thamuz/proto-common directory)
 ```bash
-mvn clean install compile
-```
-
-#### 2. Build other modules
-
-(In /thamuz directory)
-```
-mvn clean install package spring-boot:repackage -pl !proto-common
+thamuz$ make dev-build
 ```
 
 ### Run the Services
 
+> You should do it in separate shells open so that logs of different services don't interleave 
 #### 1. Start the Coordinator Node
 
-(In /thamuz/coordinator directory)
 ```bash
-java -jar target/coordinator-1.0-SNAPSHOT.jar
+thamuz$ make dev-run-coordinator
 ```
 
-#### 2. Start Data Nodes
+#### 2. Run Data Nodes
 
-Each data node should run on a different port (default 9091):
+*Each* data node should run on a different port. **Non-provided `GRPC_PORT` variable will result to `9091`**.
 
-(In /thamuz/datanode directory)
 ```bash
-java -jar target/datanode-1.0-SNAPSHOT.jar --grpc.server.port={your port}
+thamuz$ make dev-run-datanode GRPC_PORT=<your_value>
 ```
 
-#### 3. Start the Client
+#### 3. Run the CLI client
 
-(In /thamuz/client directory)
 ```bash
-java -jar target/client-1.0-SNAPSHOT.jar
+thamuz$ make dev-run-client
 ```
-There will be a Docker option here in the future :)
-
 ---
 
 ## Usage ⚡️
 
-At present, two functions are available: upload and download. These allow users to save files to the server and retrieve them, respectively.
+At present, two functions are available: uploading and downloading. These allow users to save files on the server and to retrieve them, respectively.
 
-### Upload
+### Uploading
 
-Step 1: Send the "upload" command.
+1. Send the `upload` command.
 
-Step 2: Provide the absolute path of an existing file on your computer.
+2. Provide the absolute path of an existing file on your computer.
 
-Step 3: Specify the absolute path where the file should be uploaded on the server, including the file extension.
+3. Specify the absolute path where the file should be uploaded on the server, including the file extension.
 
-Step 4: Enjoy! 👀
+4. Enjoy! 👀
 
-### Download
+### Downloading
 
-Step 1: Send the "download" command.
+1. Send the `download` command.
 
-Step 2: Provide the absolute path of the file located on the server, including the file extension.
+2. Provide the absolute path of the file located on the server, including the file extension.
 
-Step 3: Receive a message indicating the location of the downloaded file.
+3. Receive a message indicating the location of the downloaded file.
 
-Step 4: Enjoy! 👀
+4. Enjoy! 👀
+
+
+### Examples 🐘 
+
+```
+This is my first time using gRPC. Don't be too hard on me ^_^
+List of available commands:
+1) upload;
+2) download.
+
+Please enter the command:
+upload
+Enter the absolute path to the file you want to upload:
+pom.xml 
+Enter the absolute path to the file you would like to create:
+/tmp
+/tmp
+2025-01-24T04:29:56.471+03:00  INFO 40364 --- [grpc-client] [           main] r.u.sonus.service.FileProcessingService  : SUCCESS File successfully uploaded.
+```
 
 ---
 
@@ -107,6 +116,7 @@ The data nodes periodically send heartbeat messages to the coordinator to indica
 ## Authors ❤️
 
 - [Chapalax](https://github.com/Chapalax)
+- [chrxn1c](https://github.com/chrxn1c)
 
 For questions, suggestions, or issues, please create an issue on GitHub or contact the author directly.
 
